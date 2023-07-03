@@ -8,6 +8,7 @@ import okhttp3.Response;
 import javax.annotation.Nonnull;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,6 +44,10 @@ public class OKHTTPClient {
     }
 
     public void write(String data, Integer pts, String category) {
+        if(url.equals("") || token.equals("")){
+            logger.log(Level.WARNING, "url is null or token is null, can not upload data to openway");
+            return;
+        }
         Request request =
                 new Request.Builder()
                         .url(url + category + "?token=" + token)
