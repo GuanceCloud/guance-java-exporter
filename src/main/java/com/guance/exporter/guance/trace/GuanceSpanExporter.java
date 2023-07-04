@@ -4,6 +4,7 @@ import com.guance.exporter.guance.http.OKHTTPClient;
 import com.guance.exporter.guance.utils.GuanceUtils;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.internal.ThrottlingLogger;
@@ -89,7 +90,7 @@ public class GuanceSpanExporter implements SpanExporter {
     public Point convertSpanToInfluxDBPoint(SpanData span) {
         String serviceName = span.getResource().getAttributes().get(SERVICE_NAME_KEY);
         if (serviceName == null) {
-            serviceName = "name";
+            serviceName = "UNKNOWN";
         }
         String name = span.getName();
         long startTime = TimeUnit.NANOSECONDS.toMicros(span.getStartEpochNanos());
@@ -104,7 +105,7 @@ public class GuanceSpanExporter implements SpanExporter {
                         .tag("operation", name)
                         .tag("source_type", sourceType)
                         .tag("span_type", spanType)
-                        .tag("status", "ok")
+                        .tag("status",getStatusCode(span.getStatus().getStatusCode()))
                         .tag("host", GuanceUtils.getHostName())
                         .addField("trace_id", span.getSpanContext().getTraceId())
                         .addField("span_id", span.getSpanContext().getSpanId())
@@ -123,6 +124,7 @@ public class GuanceSpanExporter implements SpanExporter {
                 .forEach(
                         (key, value) ->
                                 pointBuilder.tag(key.getKey().replaceAll("\\.", "_"), value.toString()));
+
 
         pointBuilder.time(span.getStartEpochNanos(), TimeUnit.NANOSECONDS);
 
@@ -145,6 +147,16 @@ public class GuanceSpanExporter implements SpanExporter {
         }
     }
 
+    public String getStatusCode(StatusCode code){
+        switch (code){
+            case ERROR:
+                return "error";
+            case UNSET:
+            case OK:
+            default:
+                return "ok";
+        }
+    }
     public String escapeSpaces(String input) {
         return input.replaceAll(" ", "\\\\ ");
     }
