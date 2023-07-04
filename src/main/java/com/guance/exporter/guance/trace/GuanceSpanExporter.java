@@ -111,7 +111,7 @@ public class GuanceSpanExporter implements SpanExporter {
                         .addField("parent_id", span.getParentSpanId())
                         .addField("start", startTime)
                         .addField("resource", name)
-                        .addField("message", span.toString())
+                       // .addField("message", span.toString())
                         .addField("duration", duration);
 
         // Add tags as fields if required

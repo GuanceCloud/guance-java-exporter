@@ -1,4 +1,5 @@
 # guance-java-exporter
+
 this is OTEL exporter
 
 ## 如何使用
@@ -49,7 +50,7 @@ java  -javaagent:/usr/local/opentelemetry-javaagent-1.26.1-guance.jar \
     <dependency>
         <groupId>com.guance</groupId>
         <artifactId>guance-exporter</artifactId>
-       <version>1.1</version>
+       <version>1.3</version>
     </dependency>
   <!--  请确认版本！！ -->
 </dependencies>
@@ -132,3 +133,4 @@ public class YourClass {
     }
 }
 ```
+
