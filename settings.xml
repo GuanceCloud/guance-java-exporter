@@ -4,14 +4,9 @@
 
     <servers>
         <server>
-            <id>sonatype-nexus-snapshots</id>
-            <username>${env.SONATYPE_USERNAME}</username>
-            <password>${env.SONATYPE_PASSWORD}</password>
-        </server>
-        <server>
-            <id>sonatype-nexus-staging</id>
-            <username>${env.SONATYPE_USERNAME}</username>
-            <password>${env.SONATYPE_PASSWORD}</password>
+            <id>ossrh</id>
+            <username>${SONATYPE_USERNAME}</username>
+            <password>${SONATYPE_PASSWORD}</password>
         </server>
     </servers>
     <profiles>
@@ -23,7 +18,7 @@
             </activation>
             <properties>
                 <gpg.executable>gpg</gpg.executable>
-                <gpg.passphrase>${env.GPG_PASS}</gpg.passphrase>
+                <gpg.passphrase>${GPG_PASS}</gpg.passphrase>
             </properties>
         </profile>
     </profiles>

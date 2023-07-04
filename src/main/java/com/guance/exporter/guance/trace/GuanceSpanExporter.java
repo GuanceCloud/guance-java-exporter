@@ -10,15 +10,14 @@ import io.opentelemetry.sdk.internal.ThrottlingLogger;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import org.influxdb.dto.Point;
-
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-
 import static com.guance.exporter.guance.http.OKHTTPClient.TRACE_CATEGORY;
 import static java.util.Objects.requireNonNull;
 import static java.util.logging.Level.WARNING;
+import static java.util.logging.Level.FINE;
 
 public class GuanceSpanExporter implements SpanExporter {
 
@@ -54,18 +53,16 @@ public class GuanceSpanExporter implements SpanExporter {
         }
     }
 
-    @SuppressWarnings("SystemOut")
     @Override
     public CompletableResultCode export(Collection<SpanData> collection) {
-        System.out.println("-------------------export-----spans---------");
-        // todo
+
         StringBuilder sb = new StringBuilder();
 
         for (SpanData span : collection) {
             TraceFlags flags = span.getSpanContext().getTraceFlags();
             if (flags != null) {
                 if (!flags.isSampled()) {
-                    System.out.println("sampled .....");
+                    logger.log(FINE,"sampled .....");
                     continue;
                 }
             }
@@ -74,7 +71,6 @@ public class GuanceSpanExporter implements SpanExporter {
         sb.deleteCharAt(sb.length() - 1); // delete last \n
 
         delegate.write(sb.toString(), collection.size(), TRACE_CATEGORY);
-        System.out.println("post " + collection.size() + " to dataway");
 
         return CompletableResultCode.ofSuccess();
     }
@@ -132,45 +128,6 @@ public class GuanceSpanExporter implements SpanExporter {
 
         return pointBuilder.build();
     }
-
-  /*  @SuppressWarnings("SystemOut")
-  public String toPoint(SpanData span){
-    // tag: service operation source_type span_type status
-    // field: trace_id parent_id span_id resource start duration message
-    StringBuilder sb = new StringBuilder();
-    // source 是 guance_exporter
-    String name = span.getName();
-    String  serviceName = span.getResource().getAttributes().get(SERVICE_NAME_KEY);
-    if (serviceName==null){
-      serviceName = "name";
-    }
-    String traceId = span.getTraceId();
-    String spanId = span.getSpanId();
-    long startTimeNano = span.getStartEpochNanos();
-
-    long startTime = TimeUnit.NANOSECONDS.toMicros(span.getStartEpochNanos());
-    long endTime = TimeUnit.NANOSECONDS.toMicros(span.getEndEpochNanos());
-    long duration = endTime - startTime;
-    String spanType = Objects.equals(span.getParentSpanId(), "") ?"entry":"local";
-    String sourceType = getSourceType(span.getAttributes());
-    sb.append(NAME)
-        .append(",service=").append(escapeSpaces(serviceName))
-        .append(",operation=").append(escapeSpaces(name))
-        .append(",source_type=").append(sourceType)
-        .append(",span_type=").append(spanType)
-        .append(",status=").append(span.getStatus().getStatusCode().toString()).append(' ') // tags
-        .append("trace_id=").append(traceId)
-        .append(",span_id=").append(spanId)
-        .append(",parent_id=").append(span.getParentSpanId())
-        .append(",duration=").append(duration)
-        .append(",resource=").append(escapeSpaces(name))
-        .append(",start=").append(startTime)
-       // .append(",message=").append("{}")
-        .append(' ').append(startTimeNano).append('\n');
-    String point = sb.toString();
-    System.out.println(point);
-    return point;
-  }*/
 
     public static String getSourceType(Attributes attributes) {
         AttributeKey<String> httpMethodKey = AttributeKey.stringKey("http.method");

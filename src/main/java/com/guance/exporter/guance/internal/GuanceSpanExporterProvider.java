@@ -6,13 +6,11 @@ import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterPro
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public class GuanceSpanExporterProvider implements ConfigurableSpanExporterProvider {
-    @SuppressWarnings("SystemOut")
     @Override
     public String getName() {
         return "guance";
     }
 
-    @SuppressWarnings("SystemOut")
     @Override
     public SpanExporter createExporter(ConfigProperties config) {
         GuanceSpanExporter exporter = new GuanceSpanExporter();

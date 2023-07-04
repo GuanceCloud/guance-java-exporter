@@ -10,7 +10,8 @@ this is OTEL exporter
 使用命令行启动 otel agent：
 
 ```shell
-# 如果想要开启 debug 可以添加 -Dotel.javaagent.debug=true
+# 必须填写 endpoint 和 token 否则数据无法上传
+# 如果想要开启 debug 日志，可以添加 -Dotel.javaagent.debug=true
 java  -javaagent:/usr/local/opentelemetry-javaagent-1.26.1-guance.jar \
  -Dotel.traces.exporter=guance \
  -Dotel.metrics.exporter=guance \
@@ -54,7 +55,9 @@ java  -javaagent:/usr/local/opentelemetry-javaagent-1.26.1-guance.jar \
 </dependencies>
 ```
 
-要在Spring Boot中初始化一个全局的OpenTelemetry对象，你可以创建一个单例类来管理它。以下是一个示例：
+版本可在 maven2 仓库中使用最新版本：[maven2-guance-exporter](https://repo1.maven.org/maven2/com/guance/guance-exporter/)
+
+要在 `SpringBoot` 项目中初始化一个全局的 OpenTelemetry 对象，你可以创建一个单例类来管理它。以下是一个示例：
 
 首先，创建一个名为 `OpenTelemetryManager` 的类：
 
@@ -111,7 +114,7 @@ public class OpenTelemetryInitializer {
 }
 ```
 
-最后，在你的Java文件中，你可以直接通过OpenTelemetryManager类来获取全局的OpenTelemetry对象：
+最后，在你的 Java 文件中，你可以直接通过 `OpenTelemetryManager` 类来获取全局的 `OpenTelemetry` 对象：
 
 ```java
 import io.opentelemetry.api.OpenTelemetry;

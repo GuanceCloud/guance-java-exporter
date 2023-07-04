@@ -8,7 +8,6 @@ import okhttp3.Response;
 import javax.annotation.Nonnull;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,6 +58,7 @@ public class OKHTTPClient {
             if (!response.isSuccessful()) {
                 logger.log(Level.WARNING, "code=" + response.code());
             }
+            response.close();
         } catch (Exception e) {
             logger.log(Level.WARNING, e.toString());
         }
