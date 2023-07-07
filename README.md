@@ -13,7 +13,7 @@ this is OTEL exporter
 ```shell
 # 必须填写 endpoint 和 token 否则数据无法上传
 # 如果想要开启 debug 日志，可以添加 -Dotel.javaagent.debug=true
-java  -javaagent:/usr/local/opentelemetry-javaagent-1.26.1-guance.jar \
+java  -javaagent:/usr/local/opentelemetry-javaagent-1.26.4-guance.jar \
  -Dotel.traces.exporter=guance \
  -Dotel.metrics.exporter=guance \
  -Dotel.exporter.guance.endpoint=https://openway.guance.com \
@@ -50,7 +50,7 @@ java  -javaagent:/usr/local/opentelemetry-javaagent-1.26.1-guance.jar \
     <dependency>
         <groupId>com.guance</groupId>
         <artifactId>guance-exporter</artifactId>
-       <version>1.3</version>
+       <version>1.4.0</version>
     </dependency>
   <!--  请确认版本！！ -->
 </dependencies>
