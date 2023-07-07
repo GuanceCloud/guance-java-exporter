@@ -8,6 +8,7 @@ import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.internal.ThrottlingLogger;
+import io.opentelemetry.sdk.trace.data.EventData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import org.influxdb.dto.Point;
@@ -26,8 +27,10 @@ public class GuanceSpanExporter implements SpanExporter {
 
     private final ThrottlingLogger logger = new ThrottlingLogger(internalLogger);
     private static final String SERVICE_NAME = "service.name";
+    private static final String CONTAINER_NAME = "container.name";
     private static final String NAME = "opentelemetry";
     private static final AttributeKey<String> SERVICE_NAME_KEY = AttributeKey.stringKey(SERVICE_NAME);
+    private static final AttributeKey<String> CONTAINER_NAME_KEY = AttributeKey.stringKey(CONTAINER_NAME);
     private final OKHTTPClient delegate;
 
     public GuanceSpanExporter() {
@@ -83,7 +86,6 @@ public class GuanceSpanExporter implements SpanExporter {
 
     @Override
     public CompletableResultCode shutdown() {
-
         return CompletableResultCode.ofSuccess();
     }
 
@@ -92,12 +94,15 @@ public class GuanceSpanExporter implements SpanExporter {
         if (serviceName == null) {
             serviceName = "UNKNOWN";
         }
+        String container = span.getResource().getAttributes().get(CONTAINER_NAME_KEY);
+
         String name = span.getName();
         long startTime = TimeUnit.NANOSECONDS.toMicros(span.getStartEpochNanos());
         long endTime = TimeUnit.NANOSECONDS.toMicros(span.getEndEpochNanos());
         long duration = endTime - startTime;
         String sourceType = getSourceType(span.getAttributes());
-        String spanType = Objects.equals(span.getParentSpanId(), "") ? "entry" : "local";
+        String spanType = getSpanType(span.getParentSpanId());
+
         Point.Builder pointBuilder =
                 Point.measurement(NAME)
                         .tag("service", serviceName)
@@ -114,17 +119,20 @@ public class GuanceSpanExporter implements SpanExporter {
                         .addField("resource", name)
                        // .addField("message", span.toString())
                         .addField("duration", duration);
-
-        // Add tags as fields if required
-        span.getSpanContext()
-                .getTraceState()
-                .forEach((key, value) -> pointBuilder.addField(key, value));
+        if (container != null){
+            pointBuilder.tag(CONTAINER_NAME,container);
+        }
 
         span.getAttributes()
                 .forEach(
                         (key, value) ->
-                                pointBuilder.tag(key.getKey().replaceAll("\\.", "_"), value.toString()));
+                                pointBuilder.tag(key.getKey(), value.toString()));
 
+        for (EventData event : span.getEvents()) {
+            if (event.getName().equals("exception") ){
+                event.getAttributes().forEach((key,val)-> pointBuilder.addField(key.getKey(),val.toString()));
+            }
+        }
 
         pointBuilder.time(span.getStartEpochNanos(), TimeUnit.NANOSECONDS);
 
@@ -133,10 +141,11 @@ public class GuanceSpanExporter implements SpanExporter {
 
     public static String getSourceType(Attributes attributes) {
         AttributeKey<String> httpMethodKey = AttributeKey.stringKey("http.method");
+        AttributeKey<String> rpcKey = AttributeKey.stringKey("rpc.system");
         AttributeKey<String> dbSystemKey = AttributeKey.stringKey("db.system");
         AttributeKey<String> messagingSystemKey = AttributeKey.stringKey("messaging.system");
 
-        if (attributes.get(httpMethodKey) != null) {
+        if (attributes.get(httpMethodKey) != null||attributes.get(rpcKey)!=null) {
             return "web";
         } else if (attributes.get(dbSystemKey) != null) {
             return "db";
@@ -157,7 +166,11 @@ public class GuanceSpanExporter implements SpanExporter {
                 return "ok";
         }
     }
-    public String escapeSpaces(String input) {
-        return input.replaceAll(" ", "\\\\ ");
+
+    public String getSpanType(String parentId){
+        if(parentId==null){
+            return "entry";
+        }
+      return  ( parentId.equals("")||parentId.equals("0000000000000000"))?"entry":"local";
     }
 }

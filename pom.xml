@@ -4,7 +4,7 @@
   <groupId>com.guance</groupId>
   <artifactId>guance-exporter</artifactId>
   <packaging>jar</packaging>
-  <version>1.3</version>
+  <version>1.4.0</version>
   <description>otel java agent guance-exporter</description>
   <name>guance-exporter</name>
   <url>https://github.com/GuanceCloud/guance-java-exporter</url>
