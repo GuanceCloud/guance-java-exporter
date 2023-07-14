@@ -6,14 +6,14 @@ this is OTEL exporter
 
 ### agent 形式：
 
-该项目作为 exporter jar 包形式在[观测云二开 opentelemetry-java-instrumentation](https://github.com/GuanceCloud/opentelemetry-java-instrumentation)， 版本要求为 最低 v1.26.4-guance
+该项目作为 exporter jar 包形式在[观测云二开 opentelemetry-java-instrumentation](https://github.com/GuanceCloud/opentelemetry-java-instrumentation)， 版本要求为 最低 v1.26.3-guance
 
 使用命令行启动 otel agent：
 
 ```shell
 # 必须填写 endpoint 和 token 否则数据无法上传
 # 如果想要开启 debug 日志，可以添加 -Dotel.javaagent.debug=true
-java  -javaagent:/usr/local/opentelemetry-javaagent-1.26.4-guance.jar \
+java  -javaagent:/usr/local/opentelemetry-javaagent-1.26.3-guance.jar \
  -Dotel.traces.exporter=guance \
  -Dotel.metrics.exporter=guance \
  -Dotel.exporter.guance.endpoint=https://openway.guance.com \
